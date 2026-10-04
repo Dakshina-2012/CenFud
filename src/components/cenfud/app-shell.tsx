@@ -7,7 +7,6 @@ import { useCart } from "@/features/cart-context";
 import logo from "@/assets/cenfud-logo.png.asset.json";
 import type { ReactNode } from "react";
 
-const links = [{ to: "/" as const, label: "Home" }, { to: "/restaurants" as const, label: "Restaurants" }, { to: "/offers" as const, label: "Offers" }];
 export function AppShell({ children }: { children: ReactNode }) {
   const { count } = useCart();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
