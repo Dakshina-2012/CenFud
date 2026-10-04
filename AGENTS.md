@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- CenFud uses a shared domain data layer and cart provider across public routes so restaurant, menu, cart, and checkout behavior remain consistent.
+- User-owned CenFud data is persisted in Lovable Cloud behind row-level policies; public catalog data is read-only for anonymous visitors.
