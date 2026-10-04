@@ -1,24 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Bike, MapPin, Search, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FoodCard } from "@/components/cenfud/food-card";
+import { RestaurantCard } from "@/components/cenfud/restaurant-card";
+import { categories, foodItems, restaurants } from "@/lib/cenfud-data";
+import heroImage from "@/assets/cenfud-hero.jpg";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({ meta: [
+    { title: "CenFud — Your Food. Your Way." }, { name: "description", content: "Discover top local restaurants and delicious food delivered fast with CenFud." },
+    { property: "og:title", content: "CenFud — Your Food. Your Way." }, { property: "og:description", content: "Discover local favorites, exclusive offers, and fast food delivery." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  ]}), component: HomePage,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+function HomePage() { return <>
+  <section className="relative min-h-[680px] overflow-hidden bg-surface-soft lg:min-h-[720px]">
+    <img src={heroImage} alt="An abundant Indian meal ready for delivery" width={1536} height={1024} className="absolute inset-0 h-full w-full object-cover object-[64%_center] sm:object-center" />
+    <div className="absolute inset-0 bg-hero-overlay" />
+    <div className="relative mx-auto flex min-h-[680px] max-w-7xl items-center px-4 pb-24 pt-16 sm:px-6 lg:min-h-[720px] lg:px-8">
+      <div className="max-w-2xl"><div className="mb-5 inline-flex items-center gap-2 rounded-full bg-background/90 px-4 py-2 text-sm font-bold text-primary shadow-sm"><Sparkles className="text-brand-warm" />Fresh finds, delivered daily</div>
+      <h1 className="font-display text-5xl font-black leading-[1.02] text-hero-foreground sm:text-6xl lg:text-7xl">Craving something <span className="text-primary">delicious?</span></h1>
+      <p className="mt-6 max-w-xl text-lg leading-relaxed text-hero-muted sm:text-xl">Discover your favorite restaurants, order delicious meals, and get them delivered right to your doorstep.</p>
+      <div className="mt-8 max-w-xl rounded-lg border border-border bg-background p-2 shadow-xl"><div className="flex flex-col gap-2 sm:flex-row"><div className="relative flex-1"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" /><Input className="h-14 border-0 bg-transparent pl-11 shadow-none focus-visible:ring-0" placeholder="Enter your delivery location" /></div><Button asChild size="lg" className="h-14 rounded-md px-7 text-base"><Link to="/restaurants"><Search />Find food</Link></Button></div></div>
+      <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-hero-muted"><span className="flex items-center gap-2"><Bike className="text-primary" />30 min average delivery</span><span className="flex items-center gap-2"><ShieldCheck className="text-primary" />Verified restaurants</span></div></div>
     </div>
-  );
-}
+  </section>
+  <Section eyebrow="Find your flavor" title="What are you craving?" action="View all categories"><div className="grid grid-cols-4 gap-3 md:grid-cols-8">{categories.map(([name, emoji]) => <Link key={name} to="/restaurants" search={{ category: name }} className="group flex min-h-28 flex-col items-center justify-center rounded-lg border border-border bg-card p-3 text-center shadow-sm transition hover:-translate-y-1 hover:border-primary"><span className="text-4xl transition-transform group-hover:scale-110">{emoji}</span><span className="mt-2 text-xs font-bold sm:text-sm">{name}</span></Link>)}</div></Section>
+  <Section eyebrow="Loved near you" title="Popular restaurants" action="Explore restaurants" muted><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{restaurants.slice(0,3).map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)}</div></Section>
+  <Section eyebrow="Handpicked today" title="Food you’ll love" action="See everything"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{foodItems.map((item) => <FoodCard key={item.id} item={item} />)}</div></Section>
+  <section className="bg-primary py-16 text-primary-foreground"><div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-[1.2fr_1fr] md:items-center lg:px-8"><div><span className="text-sm font-bold uppercase tracking-widest text-brand-warm">First order special</span><h2 className="mt-3 font-display text-4xl font-black sm:text-5xl">₹100 off. Zero compromise.</h2><p className="mt-4 max-w-xl text-primary-foreground/75">Use code <strong className="text-primary-foreground">WELCOME100</strong> and discover your new neighborhood favorite.</p></div><div className="flex md:justify-end"><Button asChild size="lg" variant="secondary" className="h-12 rounded-full px-7"><Link to="/offers">Claim your offer<ArrowRight /></Link></Button></div></div></section>
+  <Section eyebrow="Simple by design" title="Dinner in four easy steps"><div className="grid gap-4 md:grid-cols-4">{["Choose a restaurant","Pick your favorites","Place your order","Enjoy every bite"].map((step, index) => <div key={step} className="border-l-2 border-primary pl-5 py-2"><span className="text-sm font-black text-primary">0{index+1}</span><h3 className="mt-3 font-display text-xl font-bold">{step}</h3><p className="mt-2 text-sm text-muted-foreground">Fast, clear and completely in your control.</p></div>)}</div></Section>
+  <section className="bg-surface-dark py-16 text-surface-dark-foreground"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="flex items-center gap-2 text-brand-warm"><Star className="fill-current"/><Star className="fill-current"/><Star className="fill-current"/><Star className="fill-current"/><Star className="fill-current"/></div><blockquote className="mt-6 max-w-4xl font-display text-3xl font-bold leading-snug sm:text-4xl">“CenFud has become our Friday-night ritual. Great local choices, accurate timing, and the food always arrives fresh.”</blockquote><p className="mt-5 text-sm text-surface-dark-muted">Meera S. · Ordered from Spice Route</p></div></section>
+  <footer className="border-t border-border bg-background pb-24 pt-12 lg:pb-12"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-8 px-4 sm:px-6 md:flex-row lg:px-8"><div><div className="font-display text-2xl font-black text-primary">CenFud</div><p className="mt-2 text-sm text-muted-foreground">Your Food. Your Way.</p></div><div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-semibold"><Link to="/restaurants">Restaurants</Link><Link to="/offers">Offers</Link><Link to="/auth">Account</Link><a href="mailto:hello@cenfud.com">Contact</a></div></div></footer>
+</>; }
+function Section({ eyebrow, title, action, muted=false, children }: { eyebrow: string; title: string; action: string; muted?: boolean; children: React.ReactNode }) { return <section className={muted ? "bg-muted/50 py-16" : "bg-background py-16"}><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="mb-8 flex items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-widest text-primary">{eyebrow}</p><h2 className="mt-2 font-display text-3xl font-black sm:text-4xl">{title}</h2></div><Button asChild variant="link" className="hidden sm:inline-flex"><Link to="/restaurants">{action}<ArrowRight /></Link></Button></div>{children}</div></section>; }
