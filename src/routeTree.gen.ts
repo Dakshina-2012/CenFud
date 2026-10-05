@@ -10,16 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as OffersRouteImport } from './routes/offers'
 import { Route as RestaurantsRouteImport } from './routes/restaurants'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as RestaurantIdRouteImport } from './routes/restaurant/$id'
+import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders.index'
+import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -47,10 +55,26 @@ const RestaurantsRoute = RestaurantsRouteImport.update({
   path: '/restaurants',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const RestaurantIdRoute = RestaurantIdRouteImport.update({
   id: '/restaurant/$id',
   path: '/restaurant/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedOrdersIndexRoute =
+  AuthenticatedOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -60,7 +84,10 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/offers': typeof OffersRoute
   '/restaurants': typeof RestaurantsRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/restaurant/$id': typeof RestaurantIdRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/orders/': typeof AuthenticatedOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,17 +96,24 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/offers': typeof OffersRoute
   '/restaurants': typeof RestaurantsRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/restaurant/$id': typeof RestaurantIdRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/favorites': typeof FavoritesRoute
   '/offers': typeof OffersRoute
   '/restaurants': typeof RestaurantsRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/restaurant/$id': typeof RestaurantIdRoute
+  '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
+  '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +124,10 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/offers'
     | '/restaurants'
+    | '/checkout'
     | '/restaurant/$id'
+    | '/orders/$id'
+    | '/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,20 +136,28 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/offers'
     | '/restaurants'
+    | '/checkout'
     | '/restaurant/$id'
+    | '/orders/$id'
+    | '/orders'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/auth'
     | '/cart'
     | '/favorites'
     | '/offers'
     | '/restaurants'
+    | '/_authenticated/checkout'
     | '/restaurant/$id'
+    | '/_authenticated/orders/$id'
+    | '/_authenticated/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
   FavoritesRoute: typeof FavoritesRoute
@@ -128,6 +173,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -165,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/restaurant/$id': {
       id: '/restaurant/$id'
       path: '/restaurant/$id'
@@ -172,11 +231,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/orders/': {
+      id: '/_authenticated/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orders/$id': {
+      id: '/_authenticated/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof AuthenticatedOrdersIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
+  AuthenticatedOrdersIdRoute: typeof AuthenticatedOrdersIdRoute
+  AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
+  AuthenticatedOrdersIdRoute: AuthenticatedOrdersIdRoute,
+  AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
   FavoritesRoute: FavoritesRoute,
