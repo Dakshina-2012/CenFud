@@ -16,6 +16,6 @@ export function useSession() {
     });
     return () => data.subscription.unsubscribe();
   }, []);
-  const name = (user?.user_metadata?.full_name as string | undefined) || user?.email?.split("@")[0] || "";
+  const name = (user?.user_metadata?.["full_name"] as string | undefined) || user?.email?.split("@")[0] || "";
   return { user, ready, name, signOut: () => supabase.auth.signOut() };
 }
