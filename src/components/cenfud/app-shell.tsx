@@ -1,5 +1,6 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Heart, Home, MapPin, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Heart, Home, LogOut, MapPin, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
+import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -10,6 +11,9 @@ import type { ReactNode } from "react";
 export function AppShell({ children }: { children: ReactNode }) {
   const { count } = useCart();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { user, name, signOut } = useSession();
+  const navigate = useNavigate();
+  async function handleSignOut() { await signOut(); navigate({ to: "/", replace: true }); }
   return <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
@@ -19,8 +23,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="relative hidden w-full max-w-64 xl:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><Input className="h-11 rounded-full pl-10" placeholder="Search food or restaurants" /></div>
         <Button asChild variant="ghost" size="icon" className="hidden rounded-full sm:inline-flex"><Link to="/favorites" aria-label="Favorites"><Heart /></Link></Button>
         <Button asChild variant="ghost" size="icon" className="relative rounded-full"><Link to="/cart" aria-label={`Cart with ${count} items`}><ShoppingBag />{count > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-warm px-1 text-[10px] font-bold text-brand-warm-foreground">{count}</span>}</Link></Button>
-        <Button asChild className="hidden rounded-full sm:inline-flex"><Link to="/auth"><UserRound />Sign in</Link></Button>
-        <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon" className="rounded-full lg:hidden" aria-label="Open menu"><Menu /></Button></SheetTrigger><SheetContent><SheetHeader><SheetTitle>Explore CenFud</SheetTitle></SheetHeader><nav className="mt-8 grid gap-2"><Button asChild variant={pathname === "/" ? "secondary" : "ghost"} className="justify-start"><Link to="/">Home</Link></Button><Button asChild variant={pathname === "/restaurants" ? "secondary" : "ghost"} className="justify-start"><Link to="/restaurants" search={{ category: "" }}>Restaurants</Link></Button><Button asChild variant={pathname === "/offers" ? "secondary" : "ghost"} className="justify-start"><Link to="/offers">Offers</Link></Button><Button asChild variant="ghost" className="justify-start"><Link to="/favorites">Favorites</Link></Button><Button asChild className="mt-4"><Link to="/auth">Sign in or join</Link></Button></nav></SheetContent></Sheet>
+        {user ? <div className="hidden items-center gap-2 sm:flex"><Button asChild variant="secondary" className="rounded-full"><Link to="/auth"><UserRound /><span className="max-w-28 truncate">{name}</span></Link></Button><Button variant="ghost" size="icon" className="rounded-full" aria-label="Sign out" onClick={handleSignOut}><LogOut /></Button></div> : <Button asChild className="hidden rounded-full sm:inline-flex"><Link to="/auth"><UserRound />Sign in</Link></Button>}
+        <Sheet><SheetTrigger asChild><Button variant="ghost" size="icon" className="rounded-full lg:hidden" aria-label="Open menu"><Menu /></Button></SheetTrigger><SheetContent><SheetHeader><SheetTitle>Explore CenFud</SheetTitle></SheetHeader><nav className="mt-8 grid gap-2"><Button asChild variant={pathname === "/" ? "secondary" : "ghost"} className="justify-start"><Link to="/">Home</Link></Button><Button asChild variant={pathname === "/restaurants" ? "secondary" : "ghost"} className="justify-start"><Link to="/restaurants" search={{ category: "" }}>Restaurants</Link></Button><Button asChild variant={pathname === "/offers" ? "secondary" : "ghost"} className="justify-start"><Link to="/offers">Offers</Link></Button><Button asChild variant="ghost" className="justify-start"><Link to="/favorites">Favorites</Link></Button>{user ? <><p className="mt-4 px-4 text-sm text-muted-foreground">Signed in as <span className="font-semibold text-foreground">{name}</span></p><Button variant="outline" onClick={handleSignOut}><LogOut />Sign out</Button></> : <Button asChild className="mt-4"><Link to="/auth">Sign in or join</Link></Button>}</nav></SheetContent></Sheet>
       </div>
     </header>
     <main>{children}</main>
