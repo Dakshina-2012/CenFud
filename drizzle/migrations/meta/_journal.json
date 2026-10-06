@@ -8,6 +8,13 @@
       "when": 1791085633559,
       "tag": "0000_create_cenfud_customer_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791298593598,
+      "tag": "0001_orders_realtime_and_updated_at",
+      "breakpoints": true
     }
   ]
 }
