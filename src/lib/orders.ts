@@ -50,14 +50,10 @@ export const STATUS_STEPS = [
   { key: "DELIVERED", label: "Delivered", at: 30 },
 ] as const;
 
-/** Test mode: status advances by minutes elapsed since the order was placed, unless staff set a later or cancelled status. */
-export function currentStatusIndex(status: string, createdAt: string, now = Date.now()) {
+/** Status is set by restaurant staff in the admin panel. */
+export function currentStatusIndex(status: string) {
   if (status === "CANCELLED") return -1;
-  const stored = STATUS_STEPS.findIndex((s) => s.key === status);
-  const mins = (now - new Date(createdAt).getTime()) / 60000;
-  let simulated = 0;
-  STATUS_STEPS.forEach((s, i) => { if (mins >= s.at) simulated = i; });
-  return Math.max(stored, simulated);
+  return Math.max(0, STATUS_STEPS.findIndex((s) => s.key === status));
 }
 
 export const PAYMENT_LABELS: Record<string, string> = { COD: "Cash on delivery", UPI: "UPI (test mode)", CARD: "Card (test mode)" };

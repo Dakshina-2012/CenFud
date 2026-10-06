@@ -29,7 +29,7 @@ function OrdersPage() {
     {orders.isError && <p className="mt-6 text-destructive">Couldn't load your orders.</p>}
     {orders.data?.length === 0 && <div className="mt-12 text-center"><Receipt className="mx-auto h-14 w-14 text-primary" /><p className="mt-4 font-bold">No orders yet</p><Button asChild className="mt-4 rounded-full"><Link to="/restaurants" search={{ category: "" }}>Order something delicious</Link></Button></div>}
     <div className="mt-6 grid gap-4">{orders.data?.map((o) => {
-      const idx = currentStatusIndex(o.status, o.created_at); const lines = o.items as unknown as Line[];
+      const idx = currentStatusIndex(o.status); const lines = o.items as unknown as Line[];
       return <div key={o.id} className="rounded-lg border border-border bg-card p-5">
         <div className="flex flex-wrap items-start justify-between gap-2"><div><h2 className="font-bold">{o.restaurant_name}</h2><p className="text-xs text-muted-foreground">{o.order_number} · {new Date(o.created_at).toLocaleString("en-IN")}</p></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${idx === -1 ? "bg-destructive/15 text-destructive" : idx === STATUS_STEPS.length - 1 ? "bg-success/15 text-success" : "bg-primary/10 text-primary"}`}>{idx === -1 ? "Cancelled" : STATUS_STEPS[idx]!.label}</span></div>
         <p className="mt-3 text-sm text-muted-foreground">{lines.map((l) => `${l.quantity} × ${l.name}`).join(", ")}</p>
