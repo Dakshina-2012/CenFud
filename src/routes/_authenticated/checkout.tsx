@@ -72,7 +72,7 @@ function CheckoutPage() {
   async function placeOrder() {
     setError("");
     const formOpen = showForm || list.length === 0;
-    let target = formOpen && formRef.current && new FormData(formRef.current).get("full_name") ? null : chosen;
+    let target: typeof chosen | null = formOpen && formRef.current && new FormData(formRef.current).get("full_name") ? null : chosen;
     if (payment === "UPI" && !/^[\w.-]{2,}@[a-z]{2,}$/i.test(upi.trim())) return setError("Enter a valid UPI ID, e.g. name@okaxis.");
     if (payment === "CARD") {
       const num = card.number.replace(/\s/g, "");

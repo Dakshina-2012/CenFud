@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   async function handleSignOut() { await signOut(); navigate({ to: "/", replace: true }); }
   return <div className="min-h-screen bg-background text-foreground">
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+    <header className="print:hidden sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:px-8">
         <Link to="/" aria-label="CenFud home" className="shrink-0"><img src={logo.url} alt="CenFud" className="h-14 w-14 rounded-full object-cover" /></Link>
         <nav className="hidden items-center gap-7 lg:flex"><Link to="/" className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>Home</Link><Link to="/restaurants" search={{ category: "" }} className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>Restaurants</Link><Link to="/offers" className="text-sm font-semibold text-muted-foreground transition-colors hover:text-primary" activeProps={{ className: "text-primary" }}>Offers</Link></nav>
@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
     </header>
     <main>{children}</main>
-    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background px-2 pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav className="print:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background px-2 pb-[env(safe-area-inset-bottom)] lg:hidden">
       <MobileLink to="/" label="Home" icon={<Home />} /><MobileLink to="/restaurants" label="Explore" icon={<Search />} /><MobileLink to="/favorites" label="Saved" icon={<Heart />} /><MobileLink to="/cart" label="Cart" icon={<ShoppingBag />} badge={count} /><MobileLink to="/auth" label="Account" icon={<UserRound />} />
     </nav>
   </div>;
