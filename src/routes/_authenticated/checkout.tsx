@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Banknote, CreditCard, MapPin, ShieldCheck, Smartphone, Tag } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,7 @@ function CheckoutPage() {
   const [coupon, setCoupon] = useState<CouponResult | null>(null);
   const [error, setError] = useState("");
   const [placing, setPlacing] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [upi, setUpi] = useState("");
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "", name: "" });
 
@@ -53,22 +54,25 @@ function CheckoutPage() {
 
   if (!items.length) return <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 text-center"><h1 className="font-display text-3xl font-black">Your cart is empty</h1><p className="mt-2 text-muted-foreground">Add dishes before checking out.</p><Button asChild className="mt-6 rounded-full"><Link to="/restaurants" search={{ category: "" }}>Explore restaurants</Link></Button></div>;
 
-  async function saveAddress(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setError("");
-    const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
+  async function saveFromForm() {
+    if (!formRef.current) return null;
+    const f = Object.fromEntries(new FormData(formRef.current)) as Record<string, string>;
     const parsed = addressSchema.safeParse({ ...f, label });
-    if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "Check the address");
+    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Check the address"); return null; }
     const { data, error: err } = await supabase.from("addresses").insert({ ...parsed.data, user_id: user.id, is_default: list.length === 0 }).select().single();
-    if (err) return setError("Couldn't save the address. Please try again.");
-    await qc.invalidateQueries({ queryKey: ["addresses", user.id] });
+    if (err || !data) { setError("Couldn't save the address. Please try again."); return null; }
+    qc.setQueryData(["addresses", user.id], [data, ...list]);
     setSelected(data.id); setShowForm(false);
+    return data;
   }
+  async function saveAddress(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setError(""); await saveFromForm(); }
 
   function useCoupon() { setError(""); const r = applyCoupon(couponInput, subtotal); setCoupon(r); }
 
   async function placeOrder() {
     setError("");
-    if (!chosen) return setError("Add a delivery address first.");
+    const formOpen = showForm || list.length === 0;
+    let target: typeof chosen | null = formOpen && formRef.current && new FormData(formRef.current).get("full_name") ? null : chosen;
     if (payment === "UPI" && !/^[\w.-]{2,}@[a-z]{2,}$/i.test(upi.trim())) return setError("Enter a valid UPI ID, e.g. name@okaxis.");
     if (payment === "CARD") {
       const num = card.number.replace(/\s/g, "");
@@ -78,9 +82,11 @@ function CheckoutPage() {
       if (card.name.trim().length < 2) return setError("Enter the name on card.");
     }
     setPlacing(true);
+    if (!target) target = (await saveFromForm()) ?? undefined;
+    if (!target) { setPlacing(false); if (!formRef.current) setError("Add a delivery address first."); return; }
     if (payment !== "COD") await new Promise((r) => setTimeout(r, 1500)); // simulated test payment
     const first = items[0]!;
-    const { id: _id, user_id: _u, created_at: _c, is_default: _d, ...addr } = chosen;
+    const { id: _id, user_id: _u, created_at: _c, is_default: _d, ...addr } = target;
     let orderId: string | null = null;
     for (let attempt = 0; attempt < 3 && !orderId; attempt++) {
       const { data, error: err } = await supabase.from("orders").insert({
@@ -110,7 +116,7 @@ function CheckoutPage() {
           </label>)}
           {!showForm && <Button variant="outline" className="justify-self-start rounded-full" onClick={() => setShowForm(true)}>+ Add new address</Button>}
         </div>}
-        {(showForm || (!addresses.isLoading && list.length === 0)) && <form onSubmit={saveAddress} className="mt-5 grid gap-4 sm:grid-cols-2">
+        {(showForm || (!addresses.isLoading && list.length === 0)) && <form ref={formRef} onSubmit={saveAddress} className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="flex gap-2 sm:col-span-2">{(["Home", "Work", "Other"] as const).map((l) => <Button key={l} type="button" size="sm" variant={label === l ? "default" : "outline"} className="rounded-full" onClick={() => setLabel(l)}>{l}</Button>)}</div>
           <Field name="full_name" label="Receiver name" /><Field name="phone" label="Mobile number" type="tel" />
           <Field name="address_line" label="House / street" className="sm:col-span-2" /><Field name="apartment" label="Apartment / landmark (optional)" />
